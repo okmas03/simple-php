@@ -26,10 +26,12 @@ $vysledek = $conn->query($sql);
 </head>
 <body>
 
-    <nav>
-        <a href="index.php">Zoznam zákazníkov</a>
-        <a href="pridat_zakaznika.php">Přidat zákazníka</a>
-    </nav>
+<nav>
+    <a href="index.php">Zoznam zákazníkov</a>
+    <a href="pridat_zakaznika.php">Přidat zákazníka</a>
+    <a href="vyhladat_zakaznika.php">Vyhledat zákazníka</a>
+    <a href="upravit_zakaznika.php">Upravit zákazníka</a>
+</nav>
 
     <h2>Seznam zákazníků</h2>
 

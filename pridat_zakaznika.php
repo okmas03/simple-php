@@ -1,68 +1,82 @@
 <?php
 require_once 'config.php';
 
-$zprava = "";
+$sloupec = $_GET['sloupec'] ?? '';
+$hledat = $_GET['hledat'] ?? '';
+$vysledek = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $jmeno = $_POST['jmeno'];
-    $prijmeni = $_POST['prijmeni'];
-    $ulice = $_POST['ulice'];
-    $mesto = $_POST['mesto'];
-    $psc = $_POST['psc'];
-    $email = $_POST['email'];
-    $telefon = $_POST['telefon'];
-
-    try {
-        $stmt = $conn->prepare("INSERT INTO zakaznici (jmeno, prijmeni, ulice, mesto, psc, email, telefon)
-                                VALUES (:jmeno, :prijmeni, :ulice, :mesto, :psc, :email, :telefon)");
-        $stmt->execute([
-            ':jmeno' => $jmeno,
-            ':prijmeni' => $prijmeni,
-            ':ulice' => $ulice,
-            ':mesto' => $mesto,
-            ':psc' => $psc,
-            ':email' => $email,
-            ':telefon' => $telefon
-        ]);
-        $zprava = "Zákazník byl úspěšně přidán.";
-    } catch (PDOException $e) {
-        $zprava = "Chyba při přidávání: " . $e->getMessage();
+if ($sloupec && $hledat) {
+    // whitelist sloupců, aby uživatel neposlal nebezpečný SQL dotaz
+    $povoleneSloupce = ['jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'email', 'telefon'];
+    if (in_array($sloupec, $povoleneSloupce)) {
+        $stmt = $conn->prepare("SELECT * FROM zakaznici WHERE $sloupec LIKE :hledat");
+        $stmt->execute([':hledat' => "%$hledat%"]);
+        $vysledek = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        echo "Neplatné kritérium vyhledávání.";
+        exit;
     }
 }
-
-$vysledek = $conn->query("SELECT * FROM zakaznici ORDER BY id DESC");
 ?>
 
 <!DOCTYPE html>
 <html lang="cs">
-
 <head>
     <meta charset="UTF-8">
-    <title>Správa zákazníků</title>
+    <title>Vyhledat zákazníka</title>
 </head>
-
 <body>
     <nav>
         <a href="index.php">Zoznam zákazníkov</a>
         <a href="pridat_zakaznika.php">Přidat zákazníka</a>
+        <a href="vyhledat_zakaznika.php">Vyhledat zákazníka</a>
     </nav>
-    <h1>Přidat zákazníka</h1>
 
-    <?php if ($zprava): ?>
-        <p><strong><?= htmlspecialchars($zprava) ?></strong></p>
-    <?php endif; ?>
+    <h2>Vyhledat zákazníka</h2>
 
-    <form method="post">
-        <label>Jméno: <input type="text" name="jmeno" required></label><br>
-        <label>Příjmení: <input type="text" name="prijmeni" required></label><br>
-        <label>Ulice: <input type="text" name="ulice" required></label><br>
-        <label>Město: <input type="text" name="mesto" required></label><br>
-        <label>PSČ: <input type="text" name="psc" required></label><br>
-        <label>Email: <input type="email" name="email" required></label><br>
-        <label>Telefon: <input type="text" name="telefon" required></label><br>
-        <button type="submit">Uložit</button>
+    <form method="get" action="vyhledat_zakaznika.php">
+        <label for="sloupec">Kritérium:</label>
+        <select name="sloupec" id="sloupec">
+            <option value="jmeno">Jméno</option>
+            <option value="prijmeni">Příjmení</option>
+            <option value="ulice">Ulice</option>
+            <option value="mesto">Město</option>
+            <option value="psc">PSČ</option>
+            <option value="email">Email</option>
+            <option value="telefon">Telefon</option>
+        </select>
+        <input type="text" name="hledat" required>
+        <button type="submit">Hledat</button>
     </form>
 
+    <?php if ($vysledek): ?>
+        <h3>Výsledky hledání</h3>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>ID</th>
+                <th>Jméno</th>
+                <th>Příjmení</th>
+                <th>Ulice</th>
+                <th>Město</th>
+                <th>PSČ</th>
+                <th>Email</th>
+                <th>Telefon</th>
+            </tr>
+            <?php foreach ($vysledek as $radek): ?>
+                <tr>
+                    <td><?= htmlspecialchars($radek['id']) ?></td>
+                    <td><?= htmlspecialchars($radek['jmeno']) ?></td>
+                    <td><?= htmlspecialchars($radek['prijmeni']) ?></td>
+                    <td><?= htmlspecialchars($radek['ulice']) ?></td>
+                    <td><?= htmlspecialchars($radek['mesto']) ?></td>
+                    <td><?= htmlspecialchars($radek['psc']) ?></td>
+                    <td><?= htmlspecialchars($radek['email']) ?></td>
+                    <td><?= htmlspecialchars($radek['telefon']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php elseif ($sloupec && $hledat): ?>
+        <p>Nebyly nalezeny žádné záznamy.</p>
+    <?php endif; ?>
 </body>
-
 </html>
