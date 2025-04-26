@@ -15,69 +15,89 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
 
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
     <meta charset="UTF-8">
-    <title>Vyhledání zákazníka</title>
+    <title>Vyhľadanie zákazníka</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<nav>
-    <a href="index.php">Zoznam zákazníkov</a>
-    <a href="pridat_zakaznika.php">Přidat zákazníka</a>
-    <a href="vyhladat_zakaznika.php">Vyhledat zákazníka</a>
-</nav>
+    <nav class="nav">
+        <a href="index.php">Zoznam zákazníkov</a>
+        <a href="pridat_zakaznika.php">Pridat zákazníka</a>
+        <a href="vyhladat_zakaznika.php">Vyhladat zákazníka</a>
+        <a href="upravit_zakaznika.php">Upraviť zákazníka</a>
+    </nav>
 
-<h2>Vyhledání zákazníka</h2>
+    <div class="w3-container w3-padding">
+        <h2>Vyhľadanie zákazníka</h2>
 
-<form method="get" action="vyhladat_zakaznika.php">
-    <label for="sloupec">Vyber kritérium:</label>
-    <select name="sloupec" id="sloupec" required>
-        <option value="">-- Vyber --</option>
-        <?php foreach ($kriteria as $k): ?>
-            <option value="<?= $k ?>" <?= $sloupec === $k ? 'selected' : '' ?>>
-                <?= ucfirst($k) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
+        <form method="get" action="vyhladat_zakaznika.php" class="w3-margin-bottom">
+            <div class="w3-row-padding">
+                <div class="w3-half">
+                    <label for="sloupec">Vyberte kritérium:</label>
+                    <select name="sloupec" id="sloupec" class="w3-select" required>
+                        <option value="">-- Vyber --</option>
+                        <?php foreach ($kriteria as $k): ?>
+                            <option value="<?= $k ?>" <?= $sloupec === $k ? 'selected' : '' ?>>
+                                <?= ucfirst($k) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-    <label for="hledat">Hledaný výraz:</label>
-    <input type="text" name="hledat" id="hledat" value="<?= htmlspecialchars($hledat) ?>" required>
+                <div class="w3-half">
+                    <label for="hledat">Hľadaný výraz:</label>
+                    <input type="text" name="hledat" id="hledat" value="<?= htmlspecialchars($hledat) ?>" class="w3-input" required>
+                </div>
+            </div>
 
-    <button type="submit">Hledat</button>
-</form>
+            <button type="submit" class="w3-button w3-green w3-margin-top">Hladať</button>
+        </form>
 
-<?php if ($sloupec && $hledat): ?>
-    <h3>Výsledky hledání:</h3>
+        <?php if ($sloupec && $hledat): ?>
+            <h3>Výsledok hľadania:</h3>
 
-    <?php if (count($vysledky) > 0): ?>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr>
-                <th>ID</th>
-                <th>Jméno</th>
-                <th>Příjmení</th>
-                <th>Ulice</th>
-                <th>Město</th>
-                <th>PSČ</th>
-                <th>Email</th>
-                <th>Telefon</th>
-            </tr>
-            <?php foreach ($vysledky as $zak): ?>
-                <tr>
-                    <td><?= htmlspecialchars($zak['id']) ?></td>
-                    <td><?= htmlspecialchars($zak['jmeno']) ?></td>
-                    <td><?= htmlspecialchars($zak['prijmeni']) ?></td>
-                    <td><?= htmlspecialchars($zak['ulice']) ?></td>
-                    <td><?= htmlspecialchars($zak['mesto']) ?></td>
-                    <td><?= htmlspecialchars($zak['psc']) ?></td>
-                    <td><?= htmlspecialchars($zak['email']) ?></td>
-                    <td><?= htmlspecialchars($zak['telefon']) ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-    <?php else: ?>
-        <p>Žádný zákazník nebyl nalezen.</p>
-    <?php endif; ?>
-<?php endif; ?>
+            <?php if (count($vysledky) > 0): ?>
+                <div class="w3-responsive">
+                    <table class="w3-table-all w3-hoverable w3-small">
+                        <thead>
+                            <tr class="w3-light-grey">
+                                <th>ID</th>
+                                <th>Meno</th>
+                                <th>Priezvisko</th>
+                                <th>Ulica</th>
+                                <th>Mesto</th>
+                                <th>PSČ</th>
+                                <th>Email</th>
+                                <th>Telefon</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($vysledky as $zak): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($zak['id']) ?></td>
+                                    <td><?= htmlspecialchars($zak['jmeno']) ?></td>
+                                    <td><?= htmlspecialchars($zak['prijmeni']) ?></td>
+                                    <td><?= htmlspecialchars($zak['ulice']) ?></td>
+                                    <td><?= htmlspecialchars($zak['mesto']) ?></td>
+                                    <td><?= htmlspecialchars($zak['psc']) ?></td>
+                                    <td><?= htmlspecialchars($zak['email']) ?></td>
+                                    <td><?= htmlspecialchars($zak['telefon']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <p>Žiadne výsledky.</p>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
 
 </body>
+
 </html>
