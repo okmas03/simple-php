@@ -27,48 +27,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
     $ulice = trim($_POST['ulice']);
     $mesto = trim($_POST['mesto']);
     $psc = trim($_POST['psc']);
-    $email = trim($_POST['email']);
-    $telefon = trim($_POST['telefon']);
+    $cp = trim($_POST['cp']);
 
-    if (!preg_match('/^\d{5}$/', $psc)) {
-        $zprava = "PSČ musí obsahovať presne 5 číslic.";
-    } elseif (!preg_match('/^\d{9,}$/', $telefon)) {
-        $zprava = "Telefón musí obsahovať aspoň 9 číslic.";
-    } else {
-        $stmt = $conn->prepare("UPDATE zakaznici SET 
-            jmeno = :jmeno, 
-            prijmeni = :prijmeni,
-            ulice = :ulice,
-            mesto = :mesto,
-            psc = :psc,
-            email = :email,
-            telefon = :telefon
-            WHERE id = :id");
+    // Opravený SQL UPDATE dotaz bez nadbytočnej čiarky
+    $stmt = $conn->prepare("UPDATE zakaznici SET 
+        jmeno = :jmeno, 
+        prijmeni = :prijmeni,
+        ulice = :ulice,
+        mesto = :mesto,
+        psc = :psc,
+        cp = :cp
+        WHERE id = :id");
 
-        $stmt->execute([
-            ':jmeno' => $jmeno,
-            ':prijmeni' => $prijmeni,
-            ':ulice' => $ulice,
-            ':mesto' => $mesto,
-            ':psc' => $psc,
-            ':email' => $email,
-            ':telefon' => $telefon,
-            ':id' => $id
-        ]);
+    $stmt->execute([
+        ':jmeno' => $jmeno,
+        ':prijmeni' => $prijmeni,
+        ':ulice' => $ulice,
+        ':mesto' => $mesto,
+        ':psc' => $psc,
+        ':cp' => $cp,
+        ':id' => $id
+    ]);
 
-        $zprava = "Zákazník bol úspešne upravený.";
+    $zprava = "Zákazník bol úspešne upravený.";
 
-        $zakaznik = [
-            'id' => $id,
-            'jmeno' => $jmeno,
-            'prijmeni' => $prijmeni,
-            'ulice' => $ulice,
-            'mesto' => $mesto,
-            'psc' => $psc,
-            'email' => $email,
-            'telefon' => $telefon
-        ];
-    }
+    // Aktuálne údaje zákazníka po úprave
+    $zakaznik = [
+        'id' => $id,
+        'jmeno' => $jmeno,
+        'prijmeni' => $prijmeni,
+        'ulice' => $ulice,
+        'mesto' => $mesto,
+        'psc' => $psc,
+        'cp' => $cp,
+    ];
 }
 ?>
 
@@ -84,12 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
 
 <body>
 
-    <div class="nav">
-        <a href="index.php">Zoznam zákazníkov</a>
-        <a href="pridat_zakaznika.php">Pridať zákazníka</a>
+<nav class="nav w3-margin-bottom">
+        <a href="index.php">Úvod</a>
+        <a href="zakaznici.php">Zákazníci</a>
         <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>
-        <a href="upravit_zakaznika.php">Upraviť zákazníka</a>
-    </div>
+    </nav>
 
     <div class="w3-container w3-padding">
         <h1>Upraviť zákazníka</h1>
@@ -136,12 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
                     <input class="w3-input w3-border" type="text" name="psc" value="<?= htmlspecialchars($zakaznik['psc']) ?>" required>
                 </p>
                 <p>
-                    <label>Email:</label>
-                    <input class="w3-input w3-border" type="email" name="email" value="<?= htmlspecialchars($zakaznik['email']) ?>" required>
-                </p>
-                <p>
-                    <label>Telefon:</label>
-                    <input class="w3-input w3-border" type="text" name="telefon" value="<?= htmlspecialchars($zakaznik['telefon']) ?>" required>
+                    <label>Číslo popisné:</label>
+                    <input class="w3-input w3-border" type="text" name="cp" value="<?= htmlspecialchars($zakaznik['cp']) ?>" required>
                 </p>
                 <p>
                     <button class="w3-button w3-green w3-round" type="submit" name="ulozit">Uložiť zmeny</button>

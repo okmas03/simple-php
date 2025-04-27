@@ -9,9 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ulice = trim($_POST['ulice']);
     $mesto = trim($_POST['mesto']);
     $psc = trim($_POST['psc']);
-    $email = trim($_POST['email']);
-    $telefon = trim($_POST['telefon']);
+    $cp = trim($_POST['cp']); // Nový parameter pre číslo popisné
 
+    // Validácie
     if (!preg_match('/^[a-zA-Zá-žÁ-Ž\s]+$/u', $jmeno)) {
         $zprava = "Meno môže obsahovať iba písmená a medzery.";
     } elseif (!preg_match('/^[a-zA-Zá-žÁ-Ž\s]+$/u', $prijmeni)) {
@@ -20,20 +20,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $zprava = "Mesto môže obsahovať iba písmená a medzery.";
     } elseif (!preg_match('/^\d{5}$|^\d{3}\s\d{2}$/', $psc)) {
         $zprava = "PSČ musí byť vo formáte 12345 alebo 123 45.";
-    } elseif (!preg_match('/^\+?\d{1,3}\s\d{3}\s\d{3}\s\d{3}$/', $telefon)) {
-        $zprava = "Telefón musí byť vo formáte napríklad +420 123 234 345.";
+    } elseif (!preg_match('/^\d+$/', $cp)) { // Validácia pre číslo popisné
+        $zprava = "Číslo popisné musí byť číslo.";
     } else {
         try {
-            $stmt = $conn->prepare("INSERT INTO zakaznici (jmeno, prijmeni, ulice, mesto, psc, email, telefon)
-                                    VALUES (:jmeno, :prijmeni, :ulice, :mesto, :psc, :email, :telefon)");
+            // Aktualizovaný SQL INSERT pre novú štruktúru
+            $stmt = $conn->prepare("INSERT INTO zakaznici (jmeno, prijmeni, ulice, cp, mesto, psc)
+                                    VALUES (:jmeno, :prijmeni, :ulice, :cp, :mesto, :psc)");
             $stmt->execute([
                 ':jmeno' => $jmeno,
                 ':prijmeni' => $prijmeni,
                 ':ulice' => $ulice,
+                ':cp' => $cp,  // Pridané číslo popisné
                 ':mesto' => $mesto,
-                ':psc' => $psc,
-                ':email' => $email,
-                ':telefon' => $telefon
+                ':psc' => $psc
             ]);
             $zprava = "Zákazník bol úspešne pridaný.";
         } catch (PDOException $e) {
@@ -55,11 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="w3-container w3-padding">
 
-    <nav class="nav w3-margin-bottom">
-        <a href="index.php">Zoznam zákazníkov</a>
-        <a href="pridat_zakaznika.php">Pridať zákazníka</a>
+<nav class="nav w3-margin-bottom">
+        <a href="index.php">Úvod</a>
+        <a href="zakaznici.php">Zákazníci</a>
         <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>
-        <a href="upravit_zakaznika.php">Upraviť zákazníka</a>
     </nav>
 
     <h1 class="w3-xlarge">Pridať zákazníka</h1>
@@ -88,6 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
 
             <p>
+                <label class="w3-text-black">Číslo popisné</label>
+                <input class="w3-input w3-border w3-round" placeholder="232" type="text" name="cp" required pattern="\d+" title="Číslo popisné musí byť číslo.">
+            </p>
+
+            <p>
                 <label class="w3-text-black">Mesto</label>
                 <input class="w3-input w3-border w3-round" placeholder="Trenčín" type="text" name="mesto" required pattern="[a-zA-Zá-žÁ-Ž\s]+" title="Mesto môže obsahovať iba písmená a medzery.">
             </p>
@@ -95,16 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>
                 <label class="w3-text-black">PSČ</label>
                 <input class="w3-input w3-border w3-round" type="text" name="psc" required pattern="\d{5}|\d{3}\s\d{2}" placeholder="123 45" title="PSČ musí byť 12345 alebo 123 45.">
-            </p>
-
-            <p>
-                <label class="w3-text-black">Email</label>
-                <input class="w3-input w3-border w3-round" type="email" name="email" placeholder="vzor@vzor.sk" required>
-            </p>
-
-            <p>
-                <label class="w3-text-black">Telefón</label>
-                <input class="w3-input w3-border w3-round" type="text" name="telefon" placeholder="+421 123 456 567" required pattern="\+?\d{1,3}\s\d{3}\s\d{3}\s\d{3}" title="Telefón musí byť vo formáte +420 123 234 345.">
             </p>
 
             <p>

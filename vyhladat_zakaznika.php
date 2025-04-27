@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 
-$kriteria = ['jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'email', 'telefon'];
+$kriteria = ['jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'cp'];  // Pridaný cp
 $sloupec = $_GET['sloupec'] ?? '';
 $hledat = $_GET['hledat'] ?? '';
 $vysledky = [];
@@ -14,7 +14,6 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
     $stmt->execute([':hledat' => "%$hledat%"]);
     $vysledky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -29,11 +28,10 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
 
 <body>
 
-    <nav class="nav">
-        <a href="index.php">Zoznam zákazníkov</a>
-        <a href="pridat_zakaznika.php">Pridat zákazníka</a>
-        <a href="vyhladat_zakaznika.php">Vyhladat zákazníka</a>
-        <a href="upravit_zakaznika.php">Upraviť zákazníka</a>
+<nav class="nav w3-margin-bottom">
+        <a href="index.php">Úvod</a>
+        <a href="zakaznici.php">Zákazníci</a>
+        <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>
     </nav>
 
     <div class="w3-container w3-padding">
@@ -76,8 +74,7 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
                                 <th>Ulica</th>
                                 <th>Mesto</th>
                                 <th>PSČ</th>
-                                <th>Email</th>
-                                <th>Telefon</th>
+                                <th>Číslo popisné</th>  <!-- Pridaný stĺpec pre cp -->
                             </tr>
                         </thead>
                         <tbody>
@@ -89,8 +86,7 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
                                     <td><?= htmlspecialchars($zak['ulice']) ?></td>
                                     <td><?= htmlspecialchars($zak['mesto']) ?></td>
                                     <td><?= htmlspecialchars($zak['psc']) ?></td>
-                                    <td><?= htmlspecialchars($zak['email']) ?></td>
-                                    <td><?= htmlspecialchars($zak['telefon']) ?></td>
+                                    <td><?= htmlspecialchars($zak['cp']) ?></td>  <!-- Zobrazenie čísla popisného -->
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

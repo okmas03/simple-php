@@ -1,109 +1,121 @@
 <?php
 require_once 'config.php';
 
-$zprava = "";
+// Funkce pro vytvoření databáze a vložení vzorových dat
+function vytvoritDatabazi() {
+    global $conn;
+    
+    // Vytvoření tabulky pro zákazníky
+    $sql = "
+    CREATE TABLE IF NOT EXISTS zakaznici (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        jmeno VARCHAR(100),
+        prijmeni VARCHAR(100),
+        ulice VARCHAR(255),
+        mesto VARCHAR(100),
+        psc VARCHAR(10),
+        cp VARCHAR(10)
+    )";
+    
+    try {
+        $conn->exec($sql);  // Provést vytvoření tabulky
+    } catch (PDOException $e) {
+        return "Chyba při vytváření tabulky: " . $e->getMessage();
+    }
 
-$sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'id';
-$sortOrder = isset($_GET['order']) && $_GET['order'] == 'asc' ? 'ASC' : 'DESC';
+    // Kontrola, zda již existují nějaká data v tabulce
+    $sql = "SELECT COUNT(*) FROM zakaznici";
+    $stmt = $conn->query($sql);
+    $count = $stmt->fetchColumn();
 
-$validSortColumns = ['id', 'jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'email', 'telefon'];
-if (!in_array($sortBy, $validSortColumns)) {
-    $sortBy = 'id';
+    if ($count > 0) {
+        return "Databáze již obsahuje vzorová data.";
+    }
+
+    // Vložení vzorových dat pomocí prepared statements
+    $sql = "
+    INSERT INTO zakaznici (jmeno, prijmeni, ulice, mesto, psc, cp) 
+    VALUES (:jmeno, :prijmeni, :ulice, :mesto, :psc, :cp)";
+
+    $stmt = $conn->prepare($sql);
+
+    // Vzorky dat pro vložení
+    $data = [
+        ['Jan', 'Novák', 'Náměstí 1', 'Praha', '11000', '123'],
+        ['Petr', 'Svoboda', 'Ulice 10', 'Brno', '60200', '456'],
+        ['Eva', 'Kovářová', 'Hlavní 20', 'Ostrava', '70300', '789']
+    ];
+
+    // Procházíme data a provádíme vložení
+    foreach ($data as $row) {
+        try {
+            $stmt->execute([
+                ':jmeno' => $row[0],
+                ':prijmeni' => $row[1],
+                ':ulice' => $row[2],
+                ':mesto' => $row[3],
+                ':psc' => $row[4],
+                ':cp' => $row[5]
+            ]);
+        } catch (PDOException $e) {
+            return "Chyba při vkládání vzorových dat: " . $e->getMessage();
+        }
+    }
+
+    return "Databáze a vzorová data byla úspěšně vytvořena.";
 }
 
-$sql = "SELECT * FROM zakaznici ORDER BY $sortBy $sortOrder";
-$vysledek = $conn->query($sql);
+$zprava = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vytvorit_databazi'])) {
+    $zprava = vytvoritDatabazi();
+}
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="cs">
 
 <head>
     <meta charset="UTF-8">
-    <title>Zoznam zákazníkov</title>
+    <title>Úvod</title>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="w3-container w3-light-grey">
+<body>
 
-    <nav class="nav">
-        <a href="index.php">Zoznam zákazníkov</a>
-        <a href="pridat_zakaznika.php">Pridat zákazníka</a>
+    <nav class="nav w3-margin-bottom">
+        <a href="index.php">Úvod</a>
+        <a href="zakaznici.php">Zákazníci</a>
         <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>
-        <a href="upravit_zakaznika.php">Upraviť zákazníka</a>
     </nav>
-    <div class="w3-container w3-white w3-round-large w3-padding-large w3-card-4">
 
-        <h2 class="w3-center">Zoznam zákazníkov</h2>
+    <div class="w3-container w3-padding">
+        <h1>Úvod</h1>
 
-        <form method="get" action="index.php" class="w3-container w3-margin-bottom">
-            <div class="w3-row-padding">
-                <div class="w3-third">
-                    <label for="sort">Zoradiť podľa:</label>
-                    <select name="sort" id="sort" class="w3-select" required>
-                        <option value="" disabled selected>Vyberte...</option>
-                        <option value="id" <?= ($sortBy == 'id') ? 'selected' : ''; ?>>ID</option>
-                        <option value="jmeno" <?= ($sortBy == 'jmeno') ? 'selected' : ''; ?>>Meno</option>
-                        <option value="prijmeni" <?= ($sortBy == 'prijmeni') ? 'selected' : ''; ?>>Priezvisko</option>
-                        <option value="ulice" <?= ($sortBy == 'ulice') ? 'selected' : ''; ?>>Ulica</option>
-                        <option value="mesto" <?= ($sortBy == 'mesto') ? 'selected' : ''; ?>>Mesto</option>
-                        <option value="psc" <?= ($sortBy == 'psc') ? 'selected' : ''; ?>>PSČ</option>
-                        <option value="email" <?= ($sortBy == 'email') ? 'selected' : ''; ?>>Email</option>
-                        <option value="telefon" <?= ($sortBy == 'telefon') ? 'selected' : ''; ?>>Telefon</option>
-                    </select>
-                </div>
+        <p>Vítejte v aplikaci pro správu zákazníků. Tato aplikace umožňuje:</p>
+        <ul>
+            <li>Spravovat seznam zákazníků.</li>
+            <li>Vyhledávat zákazníky podle ID.</li>
+            <li>Upravit a přidat nové zákazníky.</li>
+        </ul>
 
-                <div class="w3-third">
-                    <label for="order">Poradie:</label>
-                    <select name="order" id="order" class="w3-select" required>
-                        <option value="asc" <?= ($sortOrder == 'ASC') ? 'selected' : ''; ?>>Vzostupne</option>
-                        <option value="desc" <?= ($sortOrder == 'DESC') ? 'selected' : ''; ?>>Zostupne</option>
-                    </select>
-                </div>
+        <h2>Jak aplikace funguje:</h2>
+        <p>1. Na hlavní stránce můžete procházet seznam zákazníků.</p>
+        <p>2. Na stránce "Vyhledat zákazníka" můžete zadat ID zákazníka a upravit jeho údaje.</p>
+        <p>3. Na této stránce můžete také vytvořit databázi a naplnit ji vzorovými daty.</p>
 
-                <div class="w3-third w3-padding-top-24">
-                    <button type="submit" class="w3-button w3-green w3-block w3-round">Zoradiť</button>
-                </div>
-            </div>
+        <h2>Vytvoření databáze:</h2>
+        <form method="post" class="w3-container w3-card-4 w3-light-grey w3-padding">
+            <button class="w3-button w3-blue w3-round" type="submit" name="vytvorit_databazi">Vytvořit databázi a vzorová data</button>
         </form>
 
-        <?php if ($vysledek->rowCount() > 0): ?>
-            <div class="w3-responsive">
-                <table class="w3-table-all w3-striped w3-bordered w3-hoverable">
-                    <thead>
-                        <tr class="w3-light-grey">
-                            <th>ID</th>
-                            <th>Meno</th>
-                            <th>Priezvisko</th>
-                            <th>Ulica</th>
-                            <th>Mesto</th>
-                            <th>PSČ</th>
-                            <th>Email</th>
-                            <th>Telefon</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($radek = $vysledek->fetch(PDO::FETCH_ASSOC)): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($radek['id']) ?></td>
-                                <td><?= htmlspecialchars($radek['jmeno']) ?></td>
-                                <td><?= htmlspecialchars($radek['prijmeni']) ?></td>
-                                <td><?= htmlspecialchars($radek['ulice']) ?></td>
-                                <td><?= htmlspecialchars($radek['mesto']) ?></td>
-                                <td><?= htmlspecialchars($radek['psc']) ?></td>
-                                <td><?= htmlspecialchars($radek['email']) ?></td>
-                                <td><?= htmlspecialchars($radek['telefon']) ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+        <?php if ($zprava): ?>
+            <div class="w3-panel w3-green w3-round">
+                <p><strong><?= htmlspecialchars($zprava) ?></strong></p>
             </div>
-        <?php else: ?>
-            <p class="w3-panel w3-yellow w3-padding">Žiadne výsledky.</p>
         <?php endif; ?>
-
     </div>
 
 </body>
