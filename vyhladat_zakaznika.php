@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 
-$kriteria = ['jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'cp'];  // Pridaný cp
+$kriteria = ['jmeno', 'prijmeni', 'ulice', 'mesto', 'psc', 'cp'];
 $sloupec = $_GET['sloupec'] ?? '';
 $hledat = $_GET['hledat'] ?? '';
 $vysledky = [];
@@ -28,7 +28,7 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
 
 <body>
 
-<nav class="nav w3-margin-bottom">
+    <nav class="nav w3-margin-bottom">
         <a href="index.php">Úvod</a>
         <a href="zakaznici.php">Zákazníci</a>
         <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>
@@ -74,7 +74,7 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
                                 <th>Ulica</th>
                                 <th>Mesto</th>
                                 <th>PSČ</th>
-                                <th>Číslo popisné</th>  <!-- Pridaný stĺpec pre cp -->
+                                <th>Číslo popisné</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -86,7 +86,7 @@ if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
                                     <td><?= htmlspecialchars($zak['ulice']) ?></td>
                                     <td><?= htmlspecialchars($zak['mesto']) ?></td>
                                     <td><?= htmlspecialchars($zak['psc']) ?></td>
-                                    <td><?= htmlspecialchars($zak['cp']) ?></td>  <!-- Zobrazenie čísla popisného -->
+                                    <td><?= htmlspecialchars($zak['cp']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

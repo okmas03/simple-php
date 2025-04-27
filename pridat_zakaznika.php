@@ -9,9 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ulice = trim($_POST['ulice']);
     $mesto = trim($_POST['mesto']);
     $psc = trim($_POST['psc']);
-    $cp = trim($_POST['cp']); // Nový parameter pre číslo popisné
+    $cp = trim($_POST['cp']);
 
-    // Validácie
     if (!preg_match('/^[a-zA-Zá-žÁ-Ž\s]+$/u', $jmeno)) {
         $zprava = "Meno môže obsahovať iba písmená a medzery.";
     } elseif (!preg_match('/^[a-zA-Zá-žÁ-Ž\s]+$/u', $prijmeni)) {
@@ -20,18 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $zprava = "Mesto môže obsahovať iba písmená a medzery.";
     } elseif (!preg_match('/^\d{5}$|^\d{3}\s\d{2}$/', $psc)) {
         $zprava = "PSČ musí byť vo formáte 12345 alebo 123 45.";
-    } elseif (!preg_match('/^\d+$/', $cp)) { // Validácia pre číslo popisné
+    } elseif (!preg_match('/^\d+$/', $cp)) {
         $zprava = "Číslo popisné musí byť číslo.";
     } else {
         try {
-            // Aktualizovaný SQL INSERT pre novú štruktúru
             $stmt = $conn->prepare("INSERT INTO zakaznici (jmeno, prijmeni, ulice, cp, mesto, psc)
                                     VALUES (:jmeno, :prijmeni, :ulice, :cp, :mesto, :psc)");
             $stmt->execute([
                 ':jmeno' => $jmeno,
                 ':prijmeni' => $prijmeni,
                 ':ulice' => $ulice,
-                ':cp' => $cp,  // Pridané číslo popisné
+                ':cp' => $cp,
                 ':mesto' => $mesto,
                 ':psc' => $psc
             ]);
@@ -55,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="w3-container w3-padding">
 
-<nav class="nav w3-margin-bottom">
+    <nav class="nav w3-margin-bottom">
         <a href="index.php">Úvod</a>
         <a href="zakaznici.php">Zákazníci</a>
         <a href="vyhladat_zakaznika.php">Vyhľadať zákazníka</a>

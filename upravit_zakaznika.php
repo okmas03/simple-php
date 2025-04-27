@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
         $zprava = "Číslo popisné musí byť číslo.";
     }
 
-    // Ak sú validácie úspešné, urobíme UPDATE v databáze
     if (!$zprava) {
         $stmt = $conn->prepare("UPDATE zakaznici SET 
             jmeno = :jmeno, 
@@ -65,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
 
         $zprava = "Zákazník bol úspešne upravený.";
 
-        // Aktuálne údaje zákazníka po úprave
         $zakaznik = [
             'id' => $id,
             'jmeno' => $jmeno,
