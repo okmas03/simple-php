@@ -20,9 +20,21 @@ if (!in_array($sort, $allowedSort)) {
     $sort = 'id';
 }
 
+$naStranu = 10; 
+$strana = isset($_GET['strana']) && is_numeric($_GET['strana']) ? (int) $_GET['strana'] : 1;
+if ($strana < 1) $strana = 1;
+$zacatek = ($strana - 1) * $naStranu;
+
 try {
-    $stmt = $conn->query("SELECT * FROM zakaznici ORDER BY $sort ASC");
+    $stmt = $conn->query("SELECT COUNT(*) FROM zakaznici");
+    $celkemZakazniku = $stmt->fetchColumn();
+
+    $stmt = $conn->prepare("SELECT * FROM zakaznici ORDER BY $sort ASC LIMIT :zacatek, :naStranu");
+    $stmt->bindValue(':zacatek', $zacatek, PDO::PARAM_INT);
+    $stmt->bindValue(':naStranu', $naStranu, PDO::PARAM_INT);
+    $stmt->execute();
     $zakaznici = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Chyba při načítání zákazníků: " . $e->getMessage());
 }
@@ -56,13 +68,13 @@ try {
             <table class="w3-table-all w3-hoverable">
                 <thead>
                     <tr class="w3-light-grey">
-                        <th><a href="?sort=id">ID</a></th>
-                        <th><a href="?sort=jmeno">Meno</a></th>
-                        <th><a href="?sort=prijmeni">Priezvisko</a></th>
-                        <th><a href="?sort=ulice">Ulica</a></th>
-                        <th><a href="?sort=cp">Číslo popisné</a></th>
-                        <th><a href="?sort=mesto">Mesto</a></th>
-                        <th><a href="?sort=psc">PSČ</a></th>
+                        <th><a href="?sort=id<?= $strana ? '&strana=' . $strana : '' ?>">ID</a></th>
+                        <th><a href="?sort=jmeno<?= $strana ? '&strana=' . $strana : '' ?>">Meno</a></th>
+                        <th><a href="?sort=prijmeni<?= $strana ? '&strana=' . $strana : '' ?>">Priezvisko</a></th>
+                        <th><a href="?sort=ulice<?= $strana ? '&strana=' . $strana : '' ?>">Ulica</a></th>
+                        <th><a href="?sort=cp<?= $strana ? '&strana=' . $strana : '' ?>">Číslo popisné</a></th>
+                        <th><a href="?sort=mesto<?= $strana ? '&strana=' . $strana : '' ?>">Mesto</a></th>
+                        <th><a href="?sort=psc<?= $strana ? '&strana=' . $strana : '' ?>">PSČ</a></th>
                         <th>Akcie</th>
                     </tr>
                 </thead>
@@ -93,6 +105,26 @@ try {
             </table>
         </div>
 
+    </div>
+
+    <div class="w3-center w3-margin-top">
+        <div class="w3-bar">
+            <?php
+            $celkemStran = ceil($celkemZakazniku / $naStranu);
+
+            if ($strana > 1):
+            ?>
+                <a href="?sort=<?= htmlspecialchars($sort) ?>&strana=<?= $strana - 1 ?>" class="w3-button w3-light-grey">« Predchádzajúca</a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $celkemStran; $i++): ?>
+                <a href="?sort=<?= htmlspecialchars($sort) ?>&strana=<?= $i ?>" class="w3-button <?= $i == $strana ? 'w3-blue' : 'w3-light-grey' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <?php if ($strana < $celkemStran): ?>
+                <a href="?sort=<?= htmlspecialchars($sort) ?>&strana=<?= $strana + 1 ?>" class="w3-button w3-light-grey">Ďalšia »</a>
+            <?php endif; ?>
+        </div>
     </div>
 
 </body>

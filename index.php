@@ -37,9 +37,16 @@ function vytvoritDatabazi()
     $stmt = $conn->prepare($sql);
 
     $data = [
-        ['Jan', 'Novák', 'Náměstí 1', 'Praha', '11000', '123'],
-        ['Petr', 'Svoboda', 'Ulice 10', 'Brno', '60200', '456'],
-        ['Eva', 'Kovářová', 'Hlavní 20', 'Ostrava', '70300', '789']
+        ['Samuel', 'Kováč', 'Antonínová 4379', 'Zlín', '760 01', '40'],
+        ['Radoslav', 'Labon', 'Cigánska', 'Vranov nad Topľou', '093 01', '12'],
+        ['Eva', 'Kovářová', 'Hlavní 20', 'Ostrava', '70300', '789'],
+        ['Jakub', 'Novák', 'Náměstí 5', 'Brno', '602 00', '123'],
+        ['Anna', 'Horváthová', 'Kvetinová 10', 'Košice', '040 01', '456'],
+        ['Marek', 'Bielik', 'Slovenská 15', 'Prešov', '080 01', '789'],
+        ['Jana', 'Černá', 'Zelená 8', 'Trnava', '917 01', '321'],
+        ['Petr', 'Novotný', 'Modrá 3', 'Nitra', '949 01', '654'],
+        ['Lucie', 'Svobodová', 'Žlutá 12', 'Martin', '036 01', '987'],
+        ['Tomáš', 'Dvořák', 'Oranžová 7', 'Poprad', '058 01', '159']
     ];
 
     foreach ($data as $row) {
