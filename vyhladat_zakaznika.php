@@ -7,10 +7,14 @@ $hledat = $_GET['hledat'] ?? '';
 $vysledky = [];
 
 if ($sloupec && $hledat && in_array($sloupec, $kriteria)) {
+
+    $hledat = strip_tags(trim($hledat));
+
     $stmt = $conn->prepare("SELECT * FROM zakaznici WHERE $sloupec LIKE :hledat");
     $stmt->execute([':hledat' => "%$hledat%"]);
     $vysledky = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 ?>
 
 <!DOCTYPE html>

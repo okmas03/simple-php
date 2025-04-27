@@ -5,60 +5,70 @@ $zprava = "";
 $zakaznik = null;
 
 if (isset($_GET['id'])) {
-    $id = $_GET['id'];
+    $id = (int)$_GET['id'];
 
-    $stmt = $conn->prepare("SELECT * FROM zakaznici WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-    $zakaznik = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($id <= 0) {
+        $zprava = "Neplatné ID zákazníka.";
+    } else {
+        $stmt = $conn->prepare("SELECT * FROM zakaznici WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $zakaznik = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$zakaznik) {
-        $zprava = "Zákazník s ID $id nebol nájdený.";
+        if (!$zakaznik) {
+            $zprava = "Zákazník s ID $id nebol nájdený.";
+        }
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
-    $id = $_POST['id'];
-    $jmeno = $_POST['jmeno'];
-    $prijmeni = $_POST['prijmeni'];
-    $ulice = $_POST['ulice'];
-    $mesto = $_POST['mesto'];
-    $psc = $_POST['psc'];
-    $email = $_POST['email'];
-    $telefon = $_POST['telefon'];
+    $id = (int)$_POST['id'];
+    $jmeno = trim($_POST['jmeno']);
+    $prijmeni = trim($_POST['prijmeni']);
+    $ulice = trim($_POST['ulice']);
+    $mesto = trim($_POST['mesto']);
+    $psc = trim($_POST['psc']);
+    $email = trim($_POST['email']);
+    $telefon = trim($_POST['telefon']);
 
-    $stmt = $conn->prepare("UPDATE zakaznici SET 
-        jmeno = :jmeno, 
-        prijmeni = :prijmeni,
-        ulice = :ulice,
-        mesto = :mesto,
-        psc = :psc,
-        email = :email,
-        telefon = :telefon
-        WHERE id = :id");
+    if (!preg_match('/^\d{5}$/', $psc)) {
+        $zprava = "PSČ musí obsahovať presne 5 číslic.";
+    } elseif (!preg_match('/^\d{9,}$/', $telefon)) {
+        $zprava = "Telefón musí obsahovať aspoň 9 číslic.";
+    } else {
+        $stmt = $conn->prepare("UPDATE zakaznici SET 
+            jmeno = :jmeno, 
+            prijmeni = :prijmeni,
+            ulice = :ulice,
+            mesto = :mesto,
+            psc = :psc,
+            email = :email,
+            telefon = :telefon
+            WHERE id = :id");
 
-    $stmt->execute([
-        ':jmeno' => $jmeno,
-        ':prijmeni' => $prijmeni,
-        ':ulice' => $ulice,
-        ':mesto' => $mesto,
-        ':psc' => $psc,
-        ':email' => $email,
-        ':telefon' => $telefon,
-        ':id' => $id
-    ]);
+        $stmt->execute([
+            ':jmeno' => $jmeno,
+            ':prijmeni' => $prijmeni,
+            ':ulice' => $ulice,
+            ':mesto' => $mesto,
+            ':psc' => $psc,
+            ':email' => $email,
+            ':telefon' => $telefon,
+            ':id' => $id
+        ]);
 
-    $zprava = "Zákazník bol úspešne upravený.";
+        $zprava = "Zákazník bol úspešne upravený.";
 
-    $zakaznik = [
-        'id' => $id,
-        'jmeno' => $jmeno,
-        'prijmeni' => $prijmeni,
-        'ulice' => $ulice,
-        'mesto' => $mesto,
-        'psc' => $psc,
-        'email' => $email,
-        'telefon' => $telefon
-    ];
+        $zakaznik = [
+            'id' => $id,
+            'jmeno' => $jmeno,
+            'prijmeni' => $prijmeni,
+            'ulice' => $ulice,
+            'mesto' => $mesto,
+            'psc' => $psc,
+            'email' => $email,
+            'telefon' => $telefon
+        ];
+    }
 }
 ?>
 
@@ -94,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ulozit'])) {
             <form method="get" class="w3-container w3-card-4 w3-light-grey w3-padding">
                 <p>
                     <label>Zadajte ID zákazníka:</label>
-                    <input class="w3-input w3-border" type="number" name="id" required>
+                    <input class="w3-input w3-border" type="number" name="id" min="1" required>
                 </p>
                 <p>
                     <button class="w3-button w3-blue w3-round" type="submit">Vyhľadať</button>
