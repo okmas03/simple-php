@@ -52,7 +52,7 @@ try {
 
     <br>
 
-    <a class="w3-button w3-blue w3-round" href="index.php">← Späť na zoznam zákazníkov</a>
+    <a class="w3-button w3-blue w3-round" href="zakaznici.php">← Späť na zoznam zákazníkov</a>
 
 </body>
 
